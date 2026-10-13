@@ -78,7 +78,6 @@ public static class IntegrationEndpoints
             return Results.Accepted(value: new { published = name });
         });
 
-        // ---- Inspect: what happened to an event / an employee ----------------------------------
 
         app.MapGet("/events/{eventId}", async (string eventId, ProcessingStore store, CancellationToken ct) =>
         {
@@ -128,7 +127,6 @@ public static class IntegrationEndpoints
             });
         });
 
-        // ---- Operate: dead letters and replay --------------------------------------------------
 
         app.MapGet("/deadletters", async (bool? includeReplayed, ProcessingStore store, CancellationToken ct) =>
         {

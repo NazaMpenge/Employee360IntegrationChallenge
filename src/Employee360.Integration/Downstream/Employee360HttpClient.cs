@@ -5,10 +5,6 @@ using Polly.Timeout;
 
 namespace Employee360.Integration.Downstream;
 
-/// <summary>
-/// Sends one update to Employee 360 and reduces whatever happened to Success / Transient / Permanent.
-/// Retries happen inside the pipeline; by the time this returns Transient, retries are exhausted.
-/// </summary>
 public sealed class Employee360HttpClient : IEmployee360Client
 {
     public const string IdempotencyKeyHeader = "Idempotency-Key";
@@ -42,8 +38,6 @@ public sealed class Employee360HttpClient : IEmployee360Client
                     Content = JsonContent.Create(update, options: Json)
                 };
 
-                // The same key on every attempt. If our first call actually succeeded but the
-                // response was lost, the retry is recognised downstream and not applied twice.
                 request.Headers.Add(IdempotencyKeyHeader, update.SourceEventId);
 
                 return await _http.SendAsync(request, token);
@@ -61,10 +55,8 @@ public sealed class Employee360HttpClient : IEmployee360Client
         }
         catch (OperationCanceledException) when (!ct.IsCancellationRequested)
         {
-            // Cancelled but not by the caller (e.g. an inner timeout): treat as transient.
             return Transient(null, "Request was cancelled by a timeout.");
         }
-        // If the caller cancelled (service shutting down) we deliberately let it propagate.
     }
 
     private async Task<DownstreamResult> ClassifyAsync(HttpResponseMessage response, CancellationToken ct)
@@ -81,7 +73,6 @@ public sealed class Employee360HttpClient : IEmployee360Client
             return Transient((int)response.StatusCode, detail);
         }
 
-        // Permanent: sending the same payload again would get the same answer.
         _logger.LogError("Employee 360 permanently rejected the update. {Detail}", detail);
         return new DownstreamResult(DownstreamOutcome.PermanentFailure, (int)response.StatusCode, detail);
     }
