@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="../Employee360.MockApi/Employee360.MockApi.csproj" />
+  <Project Path="Employee360.Integration.csproj" />
+</Solution>

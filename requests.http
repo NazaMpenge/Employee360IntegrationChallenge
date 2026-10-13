@@ -1,0 +1,62 @@
+# Click "Send request" above any request (Visual Studio 2022 17.8+ / VS Code REST Client).
+# Start BOTH projects first: Employee360.MockApi (5100) and Employee360.Integration (5200).
+
+@integration = http://localhost:5200
+@mock = http://localhost:5100
+
+### 1. Publish the whole scenario sequence (samples/events/*.json)
+POST {{integration}}/samples/publish
+
+### 2. Overall status: queue depth, events by status, open dead letters
+GET {{integration}}/health
+
+### 3. What happened to the first event? (Succeeded; duplicatesIgnored counts the redelivery)
+GET {{integration}}/events/EVT-10452-001
+
+### 4. The older event that arrived after a newer one (Superseded)
+GET {{integration}}/events/EVT-10452-002
+
+### 5. Everything the integration knows about one employee
+GET {{integration}}/employees/EMP10452
+
+### 6. What actually reached Employee 360 (duplicates and stale events never did)
+GET {{mock}}/admin/stats
+
+### 7. Failed events, with payload, stage and reason
+GET {{integration}}/deadletters
+
+### 8. Replay a failed event: paste an id from the request above
+POST {{integration}}/deadletters/9b063092-6f1c-4f8e-8591-7896d0c59efe/replay
+
+### 9. Send the same event again by hand (idempotency demo)
+POST {{integration}}/events
+Content-Type: application/json
+
+{
+  "eventId": "EVT-10452-001",
+  "eventType": "EmployeeUpdated",
+  "employeeId": "EMP10452",
+  "firstName": "Amira",
+  "lastName": "Khan",
+  "department": "Data & AI",
+  "location": "Cape Town",
+  "effectiveDate": "2026-10-01T08:30:00Z"
+}
+
+### 10. Send a malformed payload by hand
+POST {{integration}}/events
+Content-Type: application/json
+
+{ "eventId": "EVT-BROKEN-002", "employeeId":
+
+### 11. Break Employee 360: the next 2 requests return 500 (modes: error500, unavailable503, badrequest400, timeout)
+POST {{mock}}/admin/faults
+Content-Type: application/json
+
+{ "mode": "error500", "times": 2 }
+
+### 12. Then publish the fault-demo event and watch the retries in the integration console
+POST {{integration}}/samples/publish/11-fault-demo.json
+
+### 13. Reset the mock API (clears stats and pending faults)
+POST {{mock}}/admin/reset

@@ -19,7 +19,27 @@ public sealed class SampleCatalog
 {
     private readonly string _directory;
 
-    public SampleCatalog(IOptions<SamplesOptions> options) => _directory = options.Value.Directory;
+    public SampleCatalog(IOptions<SamplesOptions> options) => _directory = Resolve(options.Value.Directory);
+
+    /// <summary>
+    /// Finds the samples folder wherever the app was started from (terminal at the repo root,
+    /// Visual Studio from the project folder, or the bin folder) by walking up the directory tree.
+    /// </summary>
+    private static string Resolve(string configured)
+    {
+        if (Path.IsPathRooted(configured)) return configured;
+
+        foreach (var start in new[] { System.IO.Directory.GetCurrentDirectory(), AppContext.BaseDirectory })
+        {
+            for (var dir = new DirectoryInfo(start); dir is not null; dir = dir.Parent)
+            {
+                var candidate = Path.Combine(dir.FullName, configured);
+                if (System.IO.Directory.Exists(candidate)) return candidate;
+            }
+        }
+
+        return configured; // not found; SequenceFiles() will simply return nothing
+    }
 
     public IReadOnlyList<string> SequenceFiles() =>
         System.IO.Directory.Exists(_directory)

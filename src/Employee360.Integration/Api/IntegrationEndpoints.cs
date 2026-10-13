@@ -8,6 +8,33 @@ public static class IntegrationEndpoints
 {
     public static void MapIntegrationEndpoints(this WebApplication app)
     {
+        // A landing page so opening the root URL in a browser shows what this service is and what to try.
+        app.MapGet("/", () => Results.Content("""
+            <!doctype html>
+            <html lang="en"><head><meta charset="utf-8"><meta name="color-scheme" content="light dark">
+            <title>Employee 360 Integration</title>
+            <style>body{font-family:system-ui,sans-serif;max-width:46rem;margin:2rem auto;padding:0 1rem;line-height:1.6}
+            code{background:rgba(128,128,128,.2);padding:.1rem .35rem;border-radius:4px}</style></head>
+            <body>
+            <h1>Employee 360 Integration <small>(port 5200)</small></h1>
+            <p>Receives <code>EmployeeUpdated</code> events, validates and transforms them, and forwards them to the
+            Employee 360 API (the mock on <a href="http://localhost:5100/">port 5100</a>).</p>
+            <h2>Open in the browser (GET)</h2>
+            <ul>
+              <li><a href="/health">/health</a> - queue depth, events by status, open dead letters</li>
+              <li><a href="/events/EVT-10452-001">/events/EVT-10452-001</a> - what happened to one event</li>
+              <li><a href="/employees/EMP10452">/employees/EMP10452</a> - last applied state for an employee</li>
+              <li><a href="/deadletters">/deadletters</a> - failed events with payload, stage and reason</li>
+            </ul>
+            <h2>Needs POST (use <code>requests.http</code> or PowerShell)</h2>
+            <ul>
+              <li><code>POST /samples/publish</code> - queue the scenario files from samples/events</li>
+              <li><code>POST /events</code> - queue a raw event body</li>
+              <li><code>POST /deadletters/{id}/replay</code> - re-run a failed event</li>
+            </ul>
+            </body></html>
+            """, "text/html"));
+
         // ---- Operate: health, publish ---------------------------------------------------------
 
         app.MapGet("/health", async (ProcessingStore store, IEventQueue queue, CancellationToken ct) =>

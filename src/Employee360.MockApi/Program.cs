@@ -4,6 +4,31 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<MockState>();
 var app = builder.Build();
 
+app.MapGet("/", () => Results.Content("""
+    <!doctype html>
+    <html lang="en"><head><meta charset="utf-8"><meta name="color-scheme" content="light dark">
+    <title>Mock Employee 360 API</title>
+    <style>body{font-family:system-ui,sans-serif;max-width:46rem;margin:2rem auto;padding:0 1rem;line-height:1.6}
+    code{background:rgba(128,128,128,.2);padding:.1rem .35rem;border-radius:4px}</style></head>
+    <body>
+    <h1>Mock Employee 360 API <small>(port 5100)</small></h1>
+    <p>A stand-in for the downstream system. The integration service
+    (<a href="http://localhost:5200/">port 5200</a>) sends employee updates here.</p>
+    <h2>Open in the browser (GET)</h2>
+    <ul>
+      <li><a href="/admin/stats">/admin/stats</a> - what has actually reached this API</li>
+      <li><a href="/api/employees/EMP10452">/api/employees/EMP10452</a> - an employee as stored here (404 until one is applied)</li>
+      <li><a href="/health">/health</a></li>
+    </ul>
+    <h2>Needs POST (use <code>requests.http</code> or PowerShell)</h2>
+    <ul>
+      <li><code>POST /admin/faults</code> - make the next N requests fail (error500, unavailable503, badrequest400, timeout)</li>
+      <li><code>POST /admin/reset</code> - clear stats and pending faults</li>
+      <li><code>PUT /api/employees/{id}</code> - the endpoint the integration calls (needs an Idempotency-Key header)</li>
+    </ul>
+    </body></html>
+    """, "text/html"));
+
 // ---- The "Employee 360" API the integration talks to -------------------------------------
 
 app.MapPut("/api/employees/{id}", async (

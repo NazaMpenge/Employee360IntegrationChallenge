@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Employee360.Integration/Employee360.Integration.csproj" />
+    <Project Path="src/Employee360.MockApi/Employee360.MockApi.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Employee360.Tests/Employee360.Tests.csproj" />
+  </Folder>
+</Solution>
