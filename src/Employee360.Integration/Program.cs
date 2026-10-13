@@ -1,11 +1,14 @@
+using Employee360.Integration.Downstream;
 using Employee360.Integration.Persistence;
 using Employee360.Integration.Processing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Polly;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configuration, not code: connection string and location aliases come from appsettings.
+// Configuration, not code: connection string, downstream URL/retry settings and
+// location aliases all come from appsettings (and env vars / user-secrets for secrets).
 var connectionString = builder.Configuration.GetConnectionString("Integration")
     ?? "Data Source=data/integration.db";
 
@@ -17,6 +20,24 @@ builder.Services.Configure<LocationOptions>(builder.Configuration.GetSection(Loc
 builder.Services.AddSingleton(sp =>
     new LocationNormaliser(sp.GetRequiredService<IOptions<LocationOptions>>().Value.Aliases));
 builder.Services.AddSingleton<EmployeeEventTransformer>();
+
+// Downstream Employee 360 client: HttpClient + Polly retry/timeout pipeline.
+builder.Services.Configure<Employee360ApiOptions>(builder.Configuration.GetSection(Employee360ApiOptions.SectionName));
+builder.Services.AddSingleton<ResiliencePipeline<HttpResponseMessage>>(sp =>
+    ResiliencePipelines.CreateEmployee360Pipeline(
+        sp.GetRequiredService<IOptions<Employee360ApiOptions>>().Value,
+        sp.GetRequiredService<ILoggerFactory>().CreateLogger("Employee360.Downstream")));
+
+builder.Services.AddHttpClient<IEmployee360Client, Employee360HttpClient>((sp, http) =>
+{
+    var options = sp.GetRequiredService<IOptions<Employee360ApiOptions>>().Value;
+    http.BaseAddress = new Uri(options.BaseUrl.TrimEnd('/') + "/");
+    http.Timeout = Timeout.InfiniteTimeSpan; // timeouts are owned by the Polly pipeline, per attempt
+    if (!string.IsNullOrWhiteSpace(options.ApiKey))
+        http.DefaultRequestHeaders.Add("X-Api-Key", options.ApiKey);
+});
+
+builder.Services.AddScoped<EventProcessor>();
 
 var app = builder.Build();
 
