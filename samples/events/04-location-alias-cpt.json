@@ -1,0 +1,10 @@
+{
+  "eventId": "EVT-10471-001",
+  "eventType": "EmployeeUpdated",
+  "employeeId": "EMP10471",
+  "firstName": "Sipho",
+  "lastName": "Dlamini",
+  "department": "Learning",
+  "location": "CPT",
+  "effectiveDate": "2026-10-02T07:15:00Z"
+}

@@ -1,0 +1,10 @@
+{
+  "eventId": "EVT-10452-002",
+  "eventType": "EmployeeUpdated",
+  "employeeId": "EMP10452",
+  "firstName": "Amira",
+  "lastName": "Khan",
+  "department": "Analytics",
+  "location": "Cape Town",
+  "effectiveDate": "2026-10-03T08:00:00Z"
+}

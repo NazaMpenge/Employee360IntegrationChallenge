@@ -1,0 +1,10 @@
+{
+  "eventId": "EVT-10480-001",
+  "eventType": "EmployeeUpdated",
+  "employeeId": "EMP10480",
+  "firstName": "Naledi",
+  "lastName": "Botha",
+  "department": "Recruitment",
+  "location": "Atlantis",
+  "effectiveDate": "2026-10-02T10:00:00Z"
+}

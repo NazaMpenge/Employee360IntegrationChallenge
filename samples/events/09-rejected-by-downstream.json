@@ -1,0 +1,10 @@
+{
+  "eventId": "EVT-66666-001",
+  "eventType": "EmployeeUpdated",
+  "employeeId": "EMP66666",
+  "firstName": "Poison",
+  "lastName": "Pill",
+  "department": "Operations",
+  "location": "Durban",
+  "effectiveDate": "2026-10-02T11:00:00Z"
+}

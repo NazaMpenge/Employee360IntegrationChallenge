@@ -1,0 +1,10 @@
+{
+  "eventId": "EVT-10490-001",
+  "eventType": "EmployeeUpdated",
+  "employeeId": "EMP10490",
+  "firstName": "Lerato",
+  "lastName": "Naidoo",
+  "department": "HR Systems",
+  "location": "PTA",
+  "effectiveDate": "2026-10-03T12:00:00Z"
+}

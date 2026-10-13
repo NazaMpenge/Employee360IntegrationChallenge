@@ -1,4 +1,6 @@
+using Employee360.Integration.Api;
 using Employee360.Integration.Downstream;
+using Employee360.Integration.Messaging;
 using Employee360.Integration.Persistence;
 using Employee360.Integration.Processing;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +41,12 @@ builder.Services.AddHttpClient<IEmployee360Client, Employee360HttpClient>((sp, h
 
 builder.Services.AddScoped<EventProcessor>();
 
+// Messaging: in-memory stand-in for Service Bus, drained by a background worker.
+builder.Services.Configure<SamplesOptions>(builder.Configuration.GetSection(SamplesOptions.SectionName));
+builder.Services.AddSingleton<SampleCatalog>();
+builder.Services.AddSingleton<IEventQueue, InMemoryEventQueue>();
+builder.Services.AddHostedService<EventWorker>();
+
 var app = builder.Build();
 
 // Keep setup simple for the exercise: create the SQLite file/schema on startup.
@@ -49,7 +57,7 @@ using (var scope = app.Services.CreateScope())
     scope.ServiceProvider.GetRequiredService<EmployeeIntegrationDbContext>().Database.EnsureCreated();
 }
 
-app.MapGet("/health", () => Results.Ok(new { status = "Healthy" }));
+app.MapIntegrationEndpoints();
 
 app.Run();
 

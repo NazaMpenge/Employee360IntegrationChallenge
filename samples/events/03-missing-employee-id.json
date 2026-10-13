@@ -1,0 +1,9 @@
+{
+  "eventId": "EVT-10460-001",
+  "eventType": "EmployeeUpdated",
+  "firstName": "Thabo",
+  "lastName": "Mokoena",
+  "department": "Payroll",
+  "location": "Johannesburg",
+  "effectiveDate": "2026-10-01T09:00:00Z"
+}

@@ -1,0 +1,10 @@
+{
+  "eventId": "EVT-10500-001",
+  "eventType": "EmployeeUpdated",
+  "employeeId": "EMP10500",
+  "firstName": "Kabelo",
+  "lastName": "Sithole",
+  "department": "Integration",
+  "location": "Johannesburg",
+  "effectiveDate": "2026-10-04T08:00:00Z"
+}

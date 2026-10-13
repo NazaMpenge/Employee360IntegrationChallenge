@@ -127,6 +127,41 @@ public sealed class ProcessingStore
         return deadLetter;
     }
 
+    // ---- Read side (used by the inspection endpoints) ---------------------------------------
+
+    public Task<List<ProcessedEvent>> ListEventsForEmployeeAsync(string employeeId, CancellationToken ct) =>
+        _db.ProcessedEvents.AsNoTracking()
+            .Where(e => e.EmployeeId == employeeId)
+            .OrderBy(e => e.FirstReceivedUtc)
+            .ToListAsync(ct);
+
+    public Task<List<DeadLetter>> ListDeadLettersForEventAsync(string eventId, CancellationToken ct) =>
+        _db.DeadLetters.AsNoTracking()
+            .Where(d => d.EventId == eventId)
+            .OrderBy(d => d.FailedUtc)
+            .ToListAsync(ct);
+
+    public async Task<List<DeadLetter>> ListDeadLettersAsync(bool includeReplayed, CancellationToken ct)
+    {
+        var query = _db.DeadLetters.AsNoTracking();
+        if (!includeReplayed) query = query.Where(d => !d.Replayed);
+        return await query.OrderByDescending(d => d.FailedUtc).Take(200).ToListAsync(ct);
+    }
+
+    public Task<DeadLetter?> FindDeadLetterAsync(Guid id, CancellationToken ct) =>
+        _db.DeadLetters.FirstOrDefaultAsync(d => d.Id == id, ct);
+
+    public Task<int> CountOpenDeadLettersAsync(CancellationToken ct) =>
+        _db.DeadLetters.CountAsync(d => !d.Replayed, ct);
+
+    public async Task<Dictionary<string, int>> GetStatusCountsAsync(CancellationToken ct)
+    {
+        // Grouped in memory: the table is small here, and it avoids relying on SQL translation
+        // of a column that has a value converter.
+        var statuses = await _db.ProcessedEvents.AsNoTracking().Select(e => e.Status).ToListAsync(ct);
+        return statuses.GroupBy(s => s.ToString()).ToDictionary(g => g.Key, g => g.Count());
+    }
+
     public async Task<bool> MarkDeadLetterReplayedAsync(Guid id, CancellationToken ct)
     {
         var deadLetter = await _db.DeadLetters.FirstOrDefaultAsync(d => d.Id == id, ct);
