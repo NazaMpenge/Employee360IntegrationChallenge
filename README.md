@@ -3,7 +3,6 @@
 A small C#/.NET service that consumes `EmployeeUpdated` events from an HR system (D365),
 validates and transforms them, and reliably passes them to a downstream Employee 360 REST API.
 
-> Work in progress - built step by step. See "Status" below.
 
 ## First-time setup
 
