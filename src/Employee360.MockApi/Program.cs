@@ -36,7 +36,6 @@ app.MapPut("/api/employees/{id}", async (
 {
     state.CountRequest();
 
-    // Injected faults come first so they hit exactly the next N requests.
     var fault = state.TakeFault();
     if (fault is not null)
     {
@@ -51,7 +50,10 @@ app.MapPut("/api/employees/{id}", async (
                 return Results.Problem(statusCode: 400, title: "Injected bad request");
             case "timeout":
                 try { await Task.Delay(TimeSpan.FromSeconds(60), ctx.RequestAborted); }
-                catch (OperationCanceledException) { /* the caller gave up, as intended */ }
+                catch (OperationCanceledException)
+                {
+                    
+                }
                 return Results.StatusCode(504);
         }
     }
@@ -78,8 +80,6 @@ app.MapPut("/api/employees/{id}", async (
 
 app.MapGet("/api/employees/{id}", (string id, MockState state) =>
     state.Find(id) is { } employee ? Results.Ok(employee) : Results.NotFound());
-
-// ---- Test controls: make the next requests fail, and see what actually reached us ----------
 
 app.MapPost("/admin/faults", (FaultRequest request, MockState state) =>
 {
