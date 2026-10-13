@@ -1,0 +1,19 @@
+bin/
+obj/
+.vs/
+.vscode/
+*.user
+*.suo
+TestResults/
+coverage*/
+
+# Local runtime data (SQLite db etc.)
+*.db
+*.db-shm
+*.db-wal
+data/
+
+# Secrets / local overrides - never commit
+appsettings.*.local.json
+*.secrets.json
+.env
