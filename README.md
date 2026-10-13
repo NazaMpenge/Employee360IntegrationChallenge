@@ -18,7 +18,7 @@ dotnet test
 ## Status
 
 - [x] Step 1: solution scaffold, event parsing, validation, location normalisation, mapping
-- [ ] Step 2: persistence (SQLite), idempotency, stale-event check, dead-letter store
+- [x] Step 2: persistence (SQLite), idempotency, stale-event check, dead-letter store
 - [ ] Step 3: downstream client with retries, mock Employee 360 API
 - [ ] Step 4: event queue + worker, inspection/replay endpoints
 - [ ] Step 5: remaining tests, sample events, pipeline YAML
